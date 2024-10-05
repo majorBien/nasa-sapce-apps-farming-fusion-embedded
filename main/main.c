@@ -72,7 +72,7 @@ void AnalogSensors(void *pvParameters)
         ESP_LOGI(TAG, "analog1: %.1f", analog1);
         analog2 = scaleXnormX(adc_reading2, 0, 4096, 0, 40);
         ESP_LOGI(TAG, "analog2: %.1f", analog2);
-        analog3 = scaleXnormX(adc_reading, 0, 4096, 0, 40);
+        analog3 = scaleXnormX(adc_reading3, 0, 4096, 0, 40);
         ESP_LOGI(TAG, "analog3: %.1f", analog3);
 
         vTaskDelay(pdMS_TO_TICKS(50));
