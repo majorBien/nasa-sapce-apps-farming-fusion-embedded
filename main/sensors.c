@@ -4,11 +4,17 @@
 #include "sensors.h"
 #include <bmp280.h>
 #include "tasks_settings.h"
+#include <string.h>
 
 #define DEFAULT_VREF    1100        // Default reference voltage in mV
 #define NO_OF_SAMPLES   64          // Number of samples for averaging
 
+char json_buffer[256]; 
+static SemaphoreHandle_t json_mutex;
+
 void sensorsInit(void){
+	//mutex
+	json_mutex = xSemaphoreCreateMutex();
     // bme280 error check
     ESP_ERROR_CHECK(i2cdev_init());
 
@@ -83,17 +89,17 @@ void Sensors(void *pvParameters) {
         }
         adc_reading3 /= NO_OF_SAMPLES;
 
-        // Convert ADC readings to voltages
+
         uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars);
         uint32_t voltage2 = esp_adc_cal_raw_to_voltage(adc_reading2, adc_chars);
         uint32_t voltage3 = esp_adc_cal_raw_to_voltage(adc_reading3, adc_chars);
 
-        // Scale readings to normalized values
+
         analog1 = scaleXnormX(adc_reading, 0, 4096, 0, 100);
         analog2 = scaleXnormX(adc_reading2, 0, 4096, 0, 100);
         analog3 = scaleXnormX(adc_reading3, 0, 4096, 0, 100);
 
-        // BME280 sensor data
+   
         if (bmp280_read_float(&dev, &temperature, &pressure, &humidity) != ESP_OK) {
             printf("Temperature/pressure reading failed\n");
             continue;
@@ -101,20 +107,20 @@ void Sensors(void *pvParameters) {
 
         // Construct JSON data
         cJSON *root = cJSON_CreateObject();
-        cJSON_AddNumberToObject(root, "analog1", analog1);
-        cJSON_AddNumberToObject(root, "analog2", analog2);
-        cJSON_AddNumberToObject(root, "analog3", analog3);
+        cJSON_AddNumberToObject(root, "dirt", analog1);
+        cJSON_AddNumberToObject(root, "rain", analog2);
+        cJSON_AddNumberToObject(root, "air", analog3);
         cJSON_AddNumberToObject(root, "pressure", pressure);
         cJSON_AddNumberToObject(root, "temperature", temperature);
         if (bme280p) {
             cJSON_AddNumberToObject(root, "humidity", humidity);
         }
 
-        // Print JSON to stdout or other output
+
         char *json_string = cJSON_Print(root);
         printf("%s\n", json_string);
 
-        // Cleanup
+		strncpy(json_buffer, json_string, sizeof(json_buffer));
         free(json_string);
         cJSON_Delete(root);
 

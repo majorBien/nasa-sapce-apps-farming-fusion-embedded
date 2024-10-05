@@ -21,6 +21,7 @@
 #include "tasks_settings.h"
 static const char *TAG = "ANALOG";
 
+extern char json_buffer[];
 
 //adc varriables
 static esp_adc_cal_characteristics_t *adc_chars;
