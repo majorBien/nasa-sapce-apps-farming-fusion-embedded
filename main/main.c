@@ -29,10 +29,11 @@ void app_main()
 	}
 	ESP_ERROR_CHECK(ret);
 	
-	//loraInit();
-	sensorsInit();
+	sensorsInit();	
+	loraInit();
+
 	
-	//loraTaskStart();	
+	loraTaskStart();	
 	sensorsTaskStart();
 
     

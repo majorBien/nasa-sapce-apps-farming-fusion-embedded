@@ -5,6 +5,7 @@
 #include <bmp280.h>
 #include "tasks_settings.h"
 #include <string.h>
+#include "lora.h"
 
 #define DEFAULT_VREF    1100        // Default reference voltage in mV
 #define NO_OF_SAMPLES   64          // Number of samples for averaging
@@ -116,13 +117,16 @@ void Sensors(void *pvParameters) {
             cJSON_AddNumberToObject(root, "humidity", humidity);
         }
 
+		char *json_string = cJSON_Print(root);
 
-        char *json_string = cJSON_Print(root);
-        printf("%s\n", json_string);
 
+		xSemaphoreTake(json_mutex, portMAX_DELAY);
 		strncpy(json_buffer, json_string, sizeof(json_buffer));
-        free(json_string);
-        cJSON_Delete(root);
+		xSemaphoreGive(json_mutex); 
+
+		free(json_string);
+		cJSON_Delete(root);
+
 
         vTaskDelay(pdMS_TO_TICKS(1000));
     }

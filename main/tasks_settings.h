@@ -11,7 +11,7 @@
 
 //sensors task
 #define SENSORS_STACK_SIZE           		4096
-#define SENSORS_PRIORITY					7
+#define SENSORS_PRIORITY					1
 #define SENSORS_CORE_ID						0
 
 
