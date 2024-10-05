@@ -41,6 +41,13 @@ void sensorsInit(void){
         adc2_config_channel_atten((adc2_channel_t)channel3, atten);
     }
 
+    // Configure ADC for channel 4
+    if (unit == ADC_UNIT_1) {
+        adc1_config_channel_atten((adc1_channel_t)channel4, atten);
+    } else {
+        adc2_config_channel_atten((adc2_channel_t)channel4, atten);
+    }
+    
     // Characterize ADC
     adc_chars = calloc(1, sizeof(esp_adc_cal_characteristics_t));
     esp_adc_cal_characterize(unit, atten, ADC_WIDTH_BIT_12, DEFAULT_VREF, adc_chars);
@@ -67,10 +74,11 @@ void Sensors(void *pvParameters) {
     double analog1 = 0.0;
     double analog2 = 0.0;
     double analog3 = 0.0;
+    double analog4 = 0.0;
 
     while (1) {
         // Analog readings
-        uint32_t adc_reading = 0, adc_reading2 = 0, adc_reading3 = 0;
+        uint32_t adc_reading = 0, adc_reading2 = 0, adc_reading3 = 0, adc_reading4 = 0;
 
         // Multisampling for channel 1
         for (int i = 0; i < NO_OF_SAMPLES; i++) {
@@ -89,17 +97,22 @@ void Sensors(void *pvParameters) {
             adc_reading3 += adc1_get_raw((adc1_channel_t)channel3);
         }
         adc_reading3 /= NO_OF_SAMPLES;
-
+	
+	    // Multisampling for channel 4
+        for (int i = 0; i < NO_OF_SAMPLES; i++) {
+            adc_reading4 += adc1_get_raw((adc1_channel_t)channel4);
+        }
+        adc_reading4 /= NO_OF_SAMPLES;
 
         uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars);
         uint32_t voltage2 = esp_adc_cal_raw_to_voltage(adc_reading2, adc_chars);
         uint32_t voltage3 = esp_adc_cal_raw_to_voltage(adc_reading3, adc_chars);
-
+		uint32_t voltage4 = esp_adc_cal_raw_to_voltage(adc_reading4, adc_chars);
 
         analog1 = scaleXnormX(adc_reading, 0, 4096, 0, 100);
         analog2 = scaleXnormX(adc_reading2, 0, 4096, 0, 100);
         analog3 = scaleXnormX(adc_reading3, 0, 4096, 0, 100);
-
+		analog4 = scaleXnormX(adc_reading4, 0, 4096, 0, 100);
    
         if (bmp280_read_float(&dev, &temperature, &pressure, &humidity) != ESP_OK) {
             printf("Temperature/pressure reading failed\n");
@@ -111,6 +124,7 @@ void Sensors(void *pvParameters) {
         cJSON_AddNumberToObject(root, "dirt", analog1);
         cJSON_AddNumberToObject(root, "rain", analog2);
         cJSON_AddNumberToObject(root, "air", analog3);
+        cJSON_AddNumberToObject(root, "sun", analog4);
         cJSON_AddNumberToObject(root, "pressure", pressure);
         cJSON_AddNumberToObject(root, "temperature", temperature);
         if (bme280p) {

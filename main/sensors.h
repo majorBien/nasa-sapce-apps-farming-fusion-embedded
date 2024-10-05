@@ -28,6 +28,7 @@ static esp_adc_cal_characteristics_t *adc_chars;
 static const adc_channel_t channel = ADC_CHANNEL_6;
 static const adc_channel_t channel2 = ADC_CHANNEL_7;
 static const adc_channel_t channel3 = ADC_CHANNEL_4;
+static const adc_channel_t channel4 = ADC_CHANNEL_5;
 static const adc_atten_t atten = ADC_ATTEN_DB_0;
 static const adc_unit_t unit = ADC_UNIT_1;
 //adc varriables
