@@ -17,7 +17,6 @@
 #include "tasks_settings.h"
 
 static const char *TAG = "MAIN";
-static SemaphoreHandle_t json_mutex; 
 
 void task_tx(void *pvParameters)
 {
@@ -88,7 +87,6 @@ void loraInit(void)
 
 	LoRaConfig(spreadingFactor, bandwidth, codingRate, preambleLength, payloadLen, crcOn, invertIrq);
 
-	json_mutex = xSemaphoreCreateMutex();
 }
 
 void loraTaskStart(void)
