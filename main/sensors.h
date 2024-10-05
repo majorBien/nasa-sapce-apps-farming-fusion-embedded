@@ -31,11 +31,11 @@ static const adc_atten_t atten = ADC_ATTEN_DB_0;
 static const adc_unit_t unit = ADC_UNIT_1;
 //adc varriables
 
-void analogInit(void);
+void sensorsInit(void);
 
 double scaleXnormX(uint32_t x, uint32_t in_min, uint32_t in_max, double out_min, double out_max);
 
-void analogTaskStart(void);
+void sensorsTaskStart(void);
 
 
 

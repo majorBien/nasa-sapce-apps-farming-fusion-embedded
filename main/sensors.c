@@ -5,15 +5,20 @@
  *      Author: majorbien
  */
 
-#include "analog.h"
-
+#include "sensors.h"
+#include <bmp280.h>
+#include <string.h>
+#include "tasks_settings.h"
 
 
 #define DEFAULT_VREF    1100        // Default reference voltage in mV
 #define NO_OF_SAMPLES   64          // Number of samples for averaging
 
 
-void analogInit(void){
+void sensorsInit(void){
+		//bme280 error check
+		ESP_ERROR_CHECK(i2cdev_init());	
+	
 			// Configure ADC for channel 1
 	    if (unit == ADC_UNIT_1) {
 	        adc1_config_width(ADC_WIDTH_BIT_12);
@@ -46,13 +51,31 @@ double scaleXnormX(uint32_t x, uint32_t in_min, uint32_t in_max, double out_min,
 }
 
 
-void AnalogSensors(void *pvParameters)
+void Sensors(void *pvParameters)
 {
+	//bme280
+	bmp280_params_t params;
+    bmp280_init_default_params(&params);
+    bmp280_t dev;
+    memset(&dev, 0, sizeof(bmp280_t));
+
+    ESP_ERROR_CHECK(bmp280_init_desc(&dev, BMP280_I2C_ADDRESS_0, 0, 17, 16));
+    ESP_ERROR_CHECK(bmp280_init(&dev, &params));
+
+    bool bme280p = dev.id == BME280_CHIP_ID;
+    printf("BMP280: found %s\n", bme280p ? "BME280" : "BMP280");
+
+    float pressure, temperature, humidity;
+	
+	
+	
+	//analog
     double analog1 = 0.0;
     double analog2 = 0.0;
     double analog3 = 0.0;
 
     while (1) {
+		//analog
         uint32_t adc_reading = 0;
         uint32_t adc_reading2 = 0;
         uint32_t adc_reading3 = 0;
@@ -86,12 +109,25 @@ void AnalogSensors(void *pvParameters)
         ESP_LOGI(TAG, "analog2: %.1f", analog2);
         analog3 = scaleXnormX(adc_reading3, 0, 4096, 0, 100);
         ESP_LOGI(TAG, "analog3: %.1f", analog3);
+        
+        //bme280
+        if (bmp280_read_float(&dev, &temperature, &pressure, &humidity) != ESP_OK)
+        {
+            printf("Temperature/pressure reading failed\n");
+            continue;
+        }
+ 
+        printf("Pressure: %.2f Pa, Temperature: %.2f C", pressure, temperature);
+        if (bme280p)
+            printf(", Humidity: %.2f\n", humidity);
+        else
+            printf("\n");
 
-        vTaskDelay(pdMS_TO_TICKS(50));
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
 
-void analogTaskStart(void){
-		xTaskCreatePinnedToCore(&AnalogSensors, "AnalogSensors", ANALOG_SENSORS_STACK_SIZE, NULL, ANALOG_SENSORS_PRIORITY, NULL, ANALOG_SENSORS_CORE_ID);
+void sensorsTaskStart(void){
+		xTaskCreatePinnedToCore(&Sensors, "Sensors", SENSORS_STACK_SIZE, NULL, SENSORS_PRIORITY, NULL, SENSORS_CORE_ID);
 	
 }

@@ -9,15 +9,11 @@
 #define MAIN_TASKS_SETTINGS_H_
 
 
-//analog sensor task
-#define ANALOG_SENSORS_STACK_SIZE           2048
-#define ANALOG_SENSORS_PRIORITY				7
-#define ANALOG_SENSORS_CORE_ID				0
+//sensors task
+#define SENSORS_STACK_SIZE           		4096
+#define SENSORS_PRIORITY					7
+#define SENSORS_CORE_ID						0
 
-//digital sensor task
-#define DIGITAL_SENSORS_STACK_SIZE          2048
-#define DIGITAL_SENSORS_PRIORITY			6
-#define DIGITAL_SENSORS_CORE_ID				0
 
 // LoraWAN Send task
 #define LORA_SEND_STACK_SIZE				4096
