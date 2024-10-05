@@ -109,7 +109,7 @@ void Sensors(void *pvParameters) {
         uint32_t voltage3 = esp_adc_cal_raw_to_voltage(adc_reading3, adc_chars);
 		uint32_t voltage4 = esp_adc_cal_raw_to_voltage(adc_reading4, adc_chars);
 
-        analog1 = scaleXnormX(adc_reading, 0, 4096, 0, 100);
+        analog1 = scaleXnormX(adc_reading, 0, 4096, 100, 0);
         analog2 = scaleXnormX(adc_reading2, 0, 4096, 0, 100);
         analog3 = scaleXnormX(adc_reading3, 0, 4096, 0, 100);
 		analog4 = scaleXnormX(adc_reading4, 0, 4096, 0, 100);
